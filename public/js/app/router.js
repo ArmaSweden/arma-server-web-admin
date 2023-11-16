@@ -5,17 +5,14 @@ var LayoutView = require('app/views/layout')
 var NavigationView = require('app/views/navigation')
 var ServersView = require('app/views/servers/list')
 var LogsListView = require('app/views/logs/list')
-var MissionsView = require('app/views/missions/index')
 var ModsListView = require('app/views/mods/list')
 var ServerView = require('app/views/servers/view')
 var Logs = require('app/collections/logs')
-var Missions = require('app/collections/missions')
 var Mods = require('app/collections/mods')
 var Settings = require('app/models/settings')
 var Servers = require('app/collections/servers')
 
 var $body = $('body')
-var missions = new Missions()
 var mods = new Mods()
 var settings = new Settings()
 var servers = new Servers()
@@ -25,7 +22,6 @@ module.exports = Backbone.Router.extend({
 
   routes: {
     logs: 'logs',
-    missions: 'missions',
     mods: 'mods',
     'servers/:id': 'server',
     '': 'home'
@@ -38,9 +34,6 @@ module.exports = Backbone.Router.extend({
 
     /* global io */
     var socket = io.connect()
-    socket.on('missions', function (_missions) {
-      missions.set(_missions)
-    })
     socket.on('mods', function (_mods) {
       mods.set(_mods)
     })
@@ -67,10 +60,6 @@ module.exports = Backbone.Router.extend({
     layoutView.content.show(new LogsListView({ collection: logs }))
   },
 
-  missions: function () {
-    layoutView.content.show(new MissionsView({ missions: missions }))
-  },
-
   mods: function () {
     layoutView.content.show(new ModsListView({ collection: mods }))
   },
@@ -80,7 +69,6 @@ module.exports = Backbone.Router.extend({
     if (server) {
       layoutView.content.show(new ServerView({
         model: server,
-        missions: missions,
         mods: mods
       }))
     } else {

@@ -11,7 +11,6 @@ var config = require('./config')
 var webpackConfig = require('./webpack.config')
 var setupBasicAuth = require('./lib/setup-basic-auth')
 var Manager = require('./lib/manager')
-var Missions = require('./lib/missions')
 var SteamMods = require('./lib/steam_mods')
 var Logs = require('./lib/logs')
 var Settings = require('./lib/settings')
@@ -32,7 +31,6 @@ app.use(serveStatic(path.join(__dirname, 'public')))
 
 var logs = new Logs(config)
 
-var missions = new Missions(config)
 var mods = new SteamMods(config)
 mods.updateMods()
 
@@ -42,20 +40,14 @@ var manager = new Manager(config, logs, mods)
 manager.load()
 
 app.use('/api/logs', require('./routes/logs')(logs))
-app.use('/api/missions', require('./routes/missions')(missions))
 app.use('/api/mods', require('./routes/mods')(mods))
 app.use('/api/servers', require('./routes/servers')(manager, mods))
 app.use('/api/settings', require('./routes/settings')(settings))
 
 io.on('connection', function (socket) {
-  socket.emit('missions', missions.missions)
   socket.emit('mods', mods.mods)
   socket.emit('servers', manager.getServers())
   socket.emit('settings', settings.getPublicSettings())
-})
-
-missions.on('missions', function (missions) {
-  io.emit('missions', missions)
 })
 
 mods.on('mods', function (mods) {
